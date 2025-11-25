@@ -11,11 +11,12 @@ import {
   GraduationCap,
   Zap,
 } from "lucide-react";
+import { useEffect, useState } from "react";
 
 export default function Portfolio() {
   const generateResume = () => {
     const resumeContent = `YADAMA RACHIT REDDY
-Full-Stack Developer | IoT Enthusiast | Tech Innovator
+Full-Stack Developer |  Tech Innovator
 
 CONTACT INFORMATION
 Email: yadamarachitreddy24@gmail.com
@@ -98,6 +99,32 @@ element.click();
 document.body.removeChild(element);
 };
 
+  const [viewCount, setViewCount] = useState<number | null>(null);
+  const [viewError, setViewError] = useState(false);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    fetch("https://api.countapi.xyz/hit/rachit-portfolio/views")
+      .then(async (res) => {
+        if (!res.ok) {
+          throw new Error("Failed to fetch counter");
+        }
+        const data: { value?: number } = await res.json();
+        if (!cancelled) {
+          setViewCount(typeof data.value === "number" ? data.value : null);
+        }
+      })
+      .catch(() => {
+        if (!cancelled) {
+          setViewError(true);
+        }
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   const skills = [
     {
@@ -663,7 +690,7 @@ document.body.removeChild(element);
                href="https://mail.google.com/mail/?view=cm&fs=1&to=yadamarachitreddy24@gmail.com"
                 className="inline-flex items-center justify-center gap-2 px-8 py-3 bg-white text-purple-600 rounded-lg font-semibold hover:bg-slate-100 transition-colors"
               >
-                <Mail size={20} />
+                <Mail size={20} 
                 Send Email
               </a>
               <a
@@ -698,6 +725,16 @@ document.body.removeChild(element);
           <p className="text-sm opacity-75">
             Full-Stack Developer |  Tech Innovator
           </p>
+          <div className="mt-4 inline-flex items-center justify-center gap-2 rounded-full border border-slate-700 px-4 py-2 text-sm text-slate-300" aria-live="polite">
+            <span className="font-semibold text-white">Profile Views:</span>
+            <span>
+              {viewError
+                ? "Unavailable"
+                : viewCount !== null
+                  ? viewCount.toLocaleString()
+                  : "..."}
+            </span>
+          </div>
         </div>
       </footer>
     </div>
